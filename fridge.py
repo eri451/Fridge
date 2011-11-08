@@ -104,7 +104,7 @@ def load(filename):
         print "created " + filename
         f = open(filename,"w")
         f.close()
-        load(filename)
+        d = {}
     return d
 
 if __name__ == '__main__':
