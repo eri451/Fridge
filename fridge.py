@@ -8,7 +8,8 @@ product = ""
 action  = ""
 
 def main(args):
-    fridge  = load()
+    global fridge
+    fridge  = load("fridge.json")
     if len(args) <= 1:
         action  = raw_input("Operator = ")
         if action == "show":
@@ -30,7 +31,7 @@ def open_fridge(action, product, amount):
         for i in range(amount):
             add_product(product)
         print str(amount) + " " + product + " hinzugefuegt"
-        save(fridge)
+        save(fridge, "fridge.json")
     elif action == "sub":
         if (not(fridge.has_key(product))):
             print "erst reinlegen dann raus nehmen!!"
@@ -39,7 +40,7 @@ def open_fridge(action, product, amount):
             sub_product(product)
         print str(amount) + " " + product + "rausgenommen"
         print str(fridge[product]) + " " + product + "verbleiben"
-        save(fridge)
+        save(fridge,"fridge.json")
     else:
          print "falsche Eingabe. Bitte nutze \"show\", \"add\" oder \"sub\"."
 
@@ -61,21 +62,23 @@ def sub_product(product):
     else:
         print "Fridge leer!"
 
-def save(fridge):
-    f = open("fridge.json", "w")
-    json.dump(fridge,f)
+def save(d,filename):
+    f = open(filename, "w")
+    json.dump(d,f)
     f.close()
 
-def load():
+def load(filename):
     try:
-        global fridge
-        f = open("fridge.json","r")
-        fridge = json.load(f)
+        d = {}
+        f = open(filename,"r")
+        d = json.load(f)
         f.close()
     except:
-        fridge = {}
-    finally:
-        return fridge
+        print "created " + filename
+        f = open(filename,"w")
+        f.close()
+        d = {}
+    return d
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
