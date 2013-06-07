@@ -8,15 +8,27 @@ def main(args):
     global fridge
     fridge  = load("fridge.json")
     
+    if len(args) <= 1:
+        interactiv_input()
+        return 0
+        
     argv = args_check(args[1:])
-
     if argv.list:
         show_fridge()
-        return
+        return 0
     elif (argv.sub or argv.add) and argv.product and argv.amount:
         open_fridge(argv.add, argv.sub, argv.product, argv.amount )
+        return 0
 
-def barcode_interface(mode, product = "NULL", amount = 0):
+def interactiv_input():
+    mode = raw_input("Modus= ")
+    product = raw_input("Product= ")
+    amount = int(raw_input("Anzahl= "))
+    interface(mode, product, amount)
+    return 0
+
+
+def interface(mode, product = "NULL", amount = 0):
    if mode == "add": 
        open_fridge(True, False, product, amount )
    elif mode == "sub":
