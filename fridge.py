@@ -4,10 +4,6 @@ import argparse
 import json
 import sys
 
-fridge = {}
-product = ""
-action  = ""
-
 def main(args):
     global fridge
     fridge  = load("fridge.json")
@@ -18,7 +14,15 @@ def main(args):
         show_fridge()
         return
     elif (argv.sub or argv.add) and argv.product and argv.amount:
-        open_fridge(argv, argv.product, argv.amount )
+        open_fridge(argv.add, argv.sub, argv.product, argv.amount )
+def barcode_interface(mode, product = "NULL", amount = 0):
+   if mode == "add": 
+       open_fridge(True, False, product, amount )
+   elif mode == "sub":
+       open_fridge(False, True, product, amount )
+   else:
+       print "No valid mode"
+       return 1
 
 def args_check(args):
     argparser = argparse.ArgumentParser(
@@ -55,20 +59,20 @@ def args_check(args):
             )
     return argparser.parse_args(args)
 
-def open_fridge(arg, product, amount):
-    if arg.add:
+def open_fridge(add, sub, product, amount):
+    if add:
         for i in range(amount):
             add_product(product)
         print str(amount) + " " + product + " hinzugefuegt"
         save(fridge, "fridge.json")
-    elif arg.sub:
+    elif sub:
         if (not(fridge.has_key(product))):
             print "erst reinlegen dann raus nehmen!!"
             return
         for i in range(amount):
             sub_product(product)
-        print str(amount) + " " + product + "rausgenommen"
-        print str(fridge[product]) + " " + product + "verbleiben"
+        print str(amount) + " " + product + " rausgenommen"
+        print str(fridge[product]) + " " + product + " verbleiben"
         save(fridge,"fridge.json")
     else:
          print "falsche Eingabe. Bitte nutze \"show\", \"add\" oder \"sub\"."
