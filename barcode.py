@@ -6,9 +6,7 @@ import argparse
 
 def parser(product):
     if product[0].isdigit():
-        barcode = load("barcode.json")
-        known_product = barcode[product]
-        barcode.close()
+        known_product = load("barcode.json")[product]
         return known_product
     else:
         print "could not convert please use learn first next time"
@@ -21,4 +19,21 @@ def learn():
     barcode.update({product:name})
     print barcode
     save(barcode, "barcode.json")
-    barcode.close()
+
+def save(d,filename):
+    f = open(filename, "w")
+    json.dump(d,f)
+    f.close()
+
+def load(filename):
+    try:
+        d = {}
+        f = open(filename,"r")
+        d = json.load(f)
+        f.close()
+    except:
+        print "created " + filename
+        f = open(filename,"w")
+        f.close()
+        d = {}
+    return d
