@@ -12,23 +12,47 @@ def main(args):
     global fridge
     fridge  = load("fridge.json")
     
-    args = args_check(agrs[1:])
+    argv = args_check(args[1:])
 
-    if args.list:
+    if argv.list:
         show_fridge()
         return
-    else:
-        action  = args[1]
-        amount = int(args[2])
-        product = args[3]
-    open_fridge(action, product, amount)
+#    elif argv.sub or argv.add:
+#        open_fridge(action, product, amount)
 
 def args_check(args):
+    argparser = argparse.ArgumentParser(
+            prog='fridge', 
+            argument_default=False, 
+            description='Program to list, add or sub the fridge content.'
+            )
+    mutually_parser = argparser.add_mutually_exclusive_group(required=True)
+    mutually_parser.add_argument('-l', '--list', action='store_true', help='List the content of the fridge')
 
-    argparser = argparse.ArgumentParser(prog='fridge', argument_default=False, description='Program to list, add or sub the fridge content.')
-    argparser.add_argument('-l', '--list', action='store_true', help='List the content of the fridge')    
-    argparser.add_argument('-a', '--add', action='store_true', help='Adding somee products')
-    argparser.add_argument('-s', '--sub', action='store_true', help='Substitute a product.')
+    mutually_parser.add_argument('-a', '--add',
+            action='store_true',
+            help='Adding somee products\
+                  Require \'-p\' and \'-c\''
+            )
+
+    mutually_parser.add_argument('-s', '--sub', 
+            action='store_true', 
+            help='Substitute a product.\
+                  Require \'-p\' and \'-c\''
+            )
+    
+    argparser.add_argument('-p', '--product',
+            type=str,
+            metavar='<Productname>',
+            help='Add or sub the product.\
+                  Require \'-a\' or \'-s\''
+            )
+    argparser.add_argument('-c', '--count',
+            type=int,
+            metavar='<count>',
+            help='Count of add or sub product.\
+                  Require \'-a\' or \'-s\''
+            )
     return argparser.parse_args(args)
 
 def open_fridge(action, product, amount):
