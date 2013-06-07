@@ -17,8 +17,8 @@ def main(args):
     if argv.list:
         show_fridge()
         return
-#    elif argv.sub or argv.add:
-#        open_fridge(action, product, amount)
+    elif (argv.sub or argv.add) and argv.product and argv.amount:
+        open_fridge(argv, argv.product, argv.amount )
 
 def args_check(args):
     argparser = argparse.ArgumentParser(
@@ -27,18 +27,18 @@ def args_check(args):
             description='Program to list, add or sub the fridge content.'
             )
     mutually_parser = argparser.add_mutually_exclusive_group(required=True)
-    mutually_parser.add_argument('-l', '--list', action='store_true', help='List the content of the fridge')
+    mutually_parser.add_argument('-l', '--list', action='store_true', help='List the content of the fridge.')
 
     mutually_parser.add_argument('-a', '--add',
             action='store_true',
-            help='Adding somee products\
-                  Require \'-p\' and \'-c\''
+            help='Adding somee products.\
+                  Require \'-p\' and \'-m\''
             )
 
     mutually_parser.add_argument('-s', '--sub', 
             action='store_true', 
             help='Substitute a product.\
-                  Require \'-p\' and \'-c\''
+                  Require \'-p\' and \'-m\''
             )
     
     argparser.add_argument('-p', '--product',
@@ -47,7 +47,7 @@ def args_check(args):
             help='Add or sub the product.\
                   Require \'-a\' or \'-s\''
             )
-    argparser.add_argument('-c', '--count',
+    argparser.add_argument('-m', '--amount',
             type=int,
             metavar='<count>',
             help='Count of add or sub product.\
@@ -55,13 +55,13 @@ def args_check(args):
             )
     return argparser.parse_args(args)
 
-def open_fridge(action, product, amount):
-    if action == "add":
+def open_fridge(arg, product, amount):
+    if arg.add:
         for i in range(amount):
             add_product(product)
         print str(amount) + " " + product + " hinzugefuegt"
         save(fridge, "fridge.json")
-    elif action == "sub":
+    elif arg.sub:
         if (not(fridge.has_key(product))):
             print "erst reinlegen dann raus nehmen!!"
             return
