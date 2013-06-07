@@ -1,27 +1,30 @@
-#!/usr/bin/pytVhon
+#!/usr/bin/python
 
-import argparse
-import json
 import sys
+import json
+import barcode
+import argparse
 
 def main(args):
-    global fridge
     fridge  = load("fridge.json")
     
     if len(args) <= 1:
-        interactiv_input()
+        interactiv()
         return 0
         
-    argv = args_check(args[1:])
+    argv = args_parser(args[1:])
     if argv.list:
-        show_fridge()
+        show_fridge(fridge)
         return 0
     elif (argv.sub or argv.add) and argv.product and argv.amount:
-        open_fridge(argv.add, argv.sub, argv.product, argv.amount )
+        open_fridge(fridge, argv.add, argv.sub, argv.product, argv.amount )
         return 0
 
 def interactiv():
     mode = raw_input("Modus= ")
+    if mode == "list":
+        show_fridge(load("fridge.json"))
+        return
     product = raw_input("Product= ")
     amount = int(raw_input("Anzahl= "))
     parse_manual_barcode_input(mode, product, amount)
@@ -29,34 +32,16 @@ def interactiv():
 
 
 def parse_manual_barcode_input(mode, product = "NULL", amount = 0):
-   if mode == "add": 
-       open_fridge(True, False, product, amount )
-   elif mode == "sub":
-       open_fridge(False, True, product, amount )
-   else:
-       print "No valid mode"
-       return 1
-
-def parse_barcode(product):
-    if product[0].isdigit():
-        global barcode
-        barcode = load("barcode.json")
-        return barcode[product]
+    fridge = load("fridge.json")
+    if mode == "add": 
+        open_fridge(fridge, True, False, product, amount )
+    elif mode == "sub":
+        open_fridge(fridge, False, True, product, amount )
     else:
-        print "could not convert please use learn first next time"
-        return product
+        print "No valid mode"
+        return 1
 
-def learn_barcode():
-    product = raw_input("Barcode: ")
-    name = raw_input("Name: ")
-    global barcode
-    barcode = load("barcode.json")
-    barcode.update({product:name})
-    print barcode
-    save(barcode, "barcode.json")
-
-
-def args_check(args):
+def args_parser(args):
     argparser = argparse.ArgumentParser(
             prog='fridge', 
             argument_default=False, 
@@ -91,40 +76,42 @@ def args_check(args):
             )
     return argparser.parse_args(args)
 
-def open_fridge(add, sub, product, amount):
+def open_fridge(fridge, add, sub, product, amount):
     if add:
         for i in range(amount):
-            add_product(product)
+            add_product(fridge, product)
         print str(amount) + " " + product + " hinzugefuegt"
+        print str(fridge[product]) + " " + product + " verbleiben"
         save(fridge, "fridge.json")
     elif sub:
-        if (not(fridge.has_key(product))):
+        if not fridge.has_key(product):
             print "erst reinlegen dann raus nehmen!!"
             return
         for i in range(amount):
-            sub_product(product)
+            fridge[product] = sub_product(int(fridge[product]))
         print str(amount) + " " + product + " rausgenommen"
         print str(fridge[product]) + " " + product + " verbleiben"
         save(fridge,"fridge.json")
     else:
          print "falsche Eingabe. Bitte nutze \"show\", \"add\" oder \"sub\"."
 
-def show_fridge():
+def show_fridge(fridge):
     for barcodes in fridge.keys():
-        product = parse_barcode(barcodes)
+        product = barcode.parser(barcodes)
         print "" + product + ": " + str(fridge[barcodes])
 
 
-def add_product(product):
-    if (not(fridge.has_key(product))):
+def add_product(fridge, product):
+    if not fridge.has_key(product):
         fridge.update({product : 0})
-        add_product(product)
+        add_product(fridge, product)
     else:
         fridge[product] += 1
 
 def sub_product(product):
-    if fridge[product] >= 1:
-        fridge[product] -= 1
+    if product >= 1:
+        product -= 1
+        return product
     else:
         print "Fridge leer!"
 
