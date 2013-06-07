@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/pytVhon
 
 import argparse
 import json
@@ -15,6 +15,7 @@ def main(args):
         return
     elif (argv.sub or argv.add) and argv.product and argv.amount:
         open_fridge(argv.add, argv.sub, argv.product, argv.amount )
+
 def barcode_interface(mode, product = "NULL", amount = 0):
    if mode == "add": 
        open_fridge(True, False, product, amount )
@@ -23,6 +24,25 @@ def barcode_interface(mode, product = "NULL", amount = 0):
    else:
        print "No valid mode"
        return 1
+
+def parse_barcode(product):
+    if product[0].isdigit():
+        global barcode
+        barcode = load("barcode.json")
+        return barcode[product]
+    else:
+        print "could not convert please use learn first next time"
+        return product
+
+def learn_barcode():
+    product = raw_input("Barcode: ")
+    name = raw_input("Name: ")
+    global barcode
+    barcode = load("barcode.json")
+    barcode.update({product:name})
+    print barcode
+    save(barcode, "barcode.json")
+
 
 def args_check(args):
     argparser = argparse.ArgumentParser(
@@ -78,8 +98,9 @@ def open_fridge(add, sub, product, amount):
          print "falsche Eingabe. Bitte nutze \"show\", \"add\" oder \"sub\"."
 
 def show_fridge():
-    for product in fridge.keys():
-        print "" + product + " " + str(fridge[product])
+    for barcodes in fridge.keys():
+        product = parse_barcode(barcodes)
+        print "" + product + ": " + str(fridge[barcodes])
 
 
 def add_product(product):
