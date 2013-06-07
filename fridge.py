@@ -1,5 +1,6 @@
 #!/usr/bin/python
 
+import argparse
 import json
 import sys
 
@@ -10,14 +11,10 @@ action  = ""
 def main(args):
     global fridge
     fridge  = load("fridge.json")
-    if len(args) <= 1:
-        action  = raw_input("Operator = ")
-        if action == "show":
-            show_fridge()
-            return
-        amount  = int(raw_input("Anzahl = "))
-        product = raw_input("Produkt = ")
-    elif args[1] == "show":
+    
+    args = args_check(agrs[1:])
+
+    if args.list:
         show_fridge()
         return
     else:
@@ -25,6 +22,14 @@ def main(args):
         amount = int(args[2])
         product = args[3]
     open_fridge(action, product, amount)
+
+def args_check(args):
+
+    argparser = argparse.ArgumentParser(prog='fridge', argument_default=False, description='Program to list, add or sub the fridge content.')
+    argparser.add_argument('-l', '--list', action='store_true', help='List the content of the fridge')    
+    argparser.add_argument('-a', '--add', action='store_true', help='Adding somee products')
+    argparser.add_argument('-s', '--sub', action='store_true', help='Substitute a product.')
+    return argparser.parse_args(args)
 
 def open_fridge(action, product, amount):
     if action == "add":
