@@ -20,15 +20,15 @@ def main(args):
         open_fridge(argv.add, argv.sub, argv.product, argv.amount )
         return 0
 
-def interactiv_input():
+def interactiv():
     mode = raw_input("Modus= ")
     product = raw_input("Product= ")
     amount = int(raw_input("Anzahl= "))
-    interface(mode, product, amount)
+    parse_manual_barcode_input(mode, product, amount)
     return 0
 
 
-def interface(mode, product = "NULL", amount = 0):
+def parse_manual_barcode_input(mode, product = "NULL", amount = 0):
    if mode == "add": 
        open_fridge(True, False, product, amount )
    elif mode == "sub":
