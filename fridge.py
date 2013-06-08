@@ -116,6 +116,9 @@ def interactiv():
             print "No valid mode"
         
     args.amount = int(raw_input("Anzahl= "))
+    if args.amount < 1:
+        print args.amount "invald amount"
+        sys.exit(os.EX_DATAERR)
     args.product = raw_input("Product= ")
     return args
 
