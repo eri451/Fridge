@@ -88,7 +88,8 @@ def args_parser(args):
             )
     argparser.add_argument('-m', '--amount',
             type=int,
-            metavar='<count>',
+            choices=range(1, 256),
+            metavar='<amount>',
             help='Count of add or sub product.\
                   Require \'-a\' or \'-s\''
             )
