@@ -1,47 +1,113 @@
 #!/usr/bin/python
-# how to
-# build class fridge and product
 
+import os
 import sys
 import json
-import barcode
 import argparse
+import barcodereader
+
+class awsome:
+    def __init__(self):
+        pass
+    def method(self):
+        pass
+
+class store:
+    """ Masterclass of a fridge"""
+    def __init__(self):
+        self.barcoderead = barcodereader.barcodereader()
+        self.JsonFilename = ""
+        self.JsonContent = {}
+
+    def show(self):
+        for barcodes in self.JsonContent.keys():
+            items = self.barcoderead.Parser2Json(barcodes)
+            print "" + items + ": " + str(self.JsonContent[barcodes])
+
+    def include(self, items):
+        if not self.JsonContent.has_key(items):
+            self.JsonContent.update({items : 0})
+            self.include(items)
+        else:
+            self.JsonContent[items] += 1
+            return self.JsonContent[items]
+    
+    def exclude(self, items):
+        if self.JsonContent[items] >= 1:
+            self.JsonContent[items] -= 1
+            return self.JsonContent[items]
+        else:           
+            return 0
+    
+    def Save2Json(self, json_filename):
+        fPtr = open(json_filename, 'w')
+        json.dump(self.JsonContent, fPtr)
+        fPtr.close()
+        self.JsonFilename = json_filename
+
+    def Load4Json(self, json_filename):
+        try:
+            fPtr = open(json_filename, 'r')
+            try:
+                self.JsonContent = json.load(fPtr)
+            except ValueError:
+                self.JsonContent = {}
+        except IOError:
+            fPtr = open(filename,"w")
+            print "created " + filename
+        finally:
+            fPtr.close()
+            self.JsonFilename = json_filename
 
 def main(args):
-    fridge  = load("fridge.json")
-    
-    if len(args) <= 1:
-        interactiv()
-        return 0
-        
-    argv = args_parser(args[1:])
-    if argv.list:
-        show_fridge(fridge)
-        return 0
-    elif (argv.sub or argv.add) and argv.product and argv.amount:
-        open_fridge(fridge, argv.add, argv.sub, argv.product, argv.amount )
-        return 0
+    fridge = store()
+    fridge.Load4Json("fridge.json")
+    fridge.barcoderead.Load4Json("barcode.json")
 
+    if len(args) <= 1:
+        argv  = interactiv()
+    elif len(args) > 6:
+        print "too many arguments"
+        sys.exit(os.EX_DATAERR)
+    else:
+        argv = args_parser(args[1:])
+    
+    if argv.list:
+        fridge.show()
+    elif argv.sub:
+        open_fridge(fridge, argv)
+    elif argv.add:
+        open_fridge(fridge, argv)
+    
+    fridge.Save2Json("fridge.json")
+    fridge.barcoderead.Save2Json("barcode.json")
+    sys.exit(os.EX_OK)
+        
 def interactiv():
-    mode = raw_input("Modus= ")
-    if mode == "list":
-        show_fridge(load("fridge.json"))
-        return
+    args = awsome()
+    args.add = False
+    args.sub = False
+    args.list = False
+    args.product = "NULL"
+    args.amount = 0
+    while (not args.list) and (not args.add) and (not args.sub):
+        mode = raw_input("Modus= ")
+        if mode == "list":
+            args.list = True
+            return args
+        elif mode == "add":
+            args.add = True
+        elif mode == "sub":
+            args.sub = True
+        elif mode == "esc":
+            sys.exit(os.EX_OK)
+        else:
+            print "No valid mode"
+        
     product = raw_input("Product= ")
     amount = int(raw_input("Anzahl= "))
-    parse_manual_barcode_input(mode, product, amount)
-    return 0
+    return args
 
-
-def parse_manual_barcode_input(mode, product = "NULL", amount = 0):
-    fridge = load("fridge.json")
-    if mode == "add": 
-        open_fridge(fridge, True, False, product, amount )
-    elif mode == "sub":
-        open_fridge(fridge, False, True, product, amount )
-    else:
-        print "No valid mode"
-        return 1
 
 def args_parser(args):
     argparser = argparse.ArgumentParser(
@@ -78,66 +144,26 @@ def args_parser(args):
             )
     return argparser.parse_args(args)
 
-def open_fridge(fridge, add, sub, product, amount):
-    if add:
-        for i in range(amount):
-            add_product(fridge, product)
-        print str(amount) + " " + product + " hinzugefuegt"
-        print str(fridge[product]) + " " + product + " verbleiben"
-        save(fridge, "fridge.json")
-    elif sub:
-        if not fridge.has_key(product):
-            print "erst reinlegen dann raus nehmen!!"
-            return
-        for i in range(amount):
-            if not fridge[product]:
+def open_fridge(fridge, argv):
+    for i in range(argv.amount):
+        if argv.add:
+            fridge.include(argv.product)
+        elif argv.sub:
+            if not fridge.JsonContent.has_key(argv.product):
+                print "erst reinlegen dann raus nehmen!!"
+                return
+            elif not fridge.JsonContent[argv.product]:
                 print "Fridge leer!"
+                i-=1
                 break
             else:
-                fridge[product] = sub_product(fridge[product])
-        print str(i) + " " + product + " rausgenommen"
-        print str(fridge[product]) + " " + product + " verbleiben"
-        save(fridge,"fridge.json")
-    else:
-         print "falsche Eingabe. Bitte nutze \"show\", \"add\" oder \"sub\"."
-
-def show_fridge(fridge):
-    for barcodes in fridge.keys():
-        product = barcode.parser(barcodes)
-        print "" + product + ": " + str(fridge[barcodes])
-
-
-def add_product(fridge, product):
-    if not fridge.has_key(product):
-        fridge.update({product : 0})
-        add_product(fridge, product)
-    else:
-        fridge[product] += 1
-
-def sub_product(product):
-    if product >= 1:
-        product -= 1
-        return product
-    else:           
-        return 0
-
-def save(d,filename):
-    f = open(filename, "w")
-    json.dump(d,f)
-    f.close()
-
-def load(filename):
-    try:
-        d = {}
-        f = open(filename,"r")
-        d = json.load(f)
-        f.close()
-    except:
-        print "created " + filename
-        f = open(filename,"w")
-        f.close()
-        d = {}
-    return d
+                fridge.exclude(argv.product)
+    i+=1            
+    if argv.add:
+        print str(i) + " " + argv.product + " hinzugefuegt"
+    if argv.sub:
+        print str(i) + " " + argv.product + " rausgenommen"
+    print str(fridge.JsonContent[argv.product]) + " " + argv.product + " verbleiben"
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

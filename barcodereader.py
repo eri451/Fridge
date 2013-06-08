@@ -1,24 +1,27 @@
 #!/usr/bin/python
 
-import sys
 import json
-import argparse
 
 class barcodereader:
     """Simple Class for abarcodereader"""
     def __init__(self):
-        self.JsonFileContent = {}
+        self.JsonContent = {}
         self.JsonFilename= ""
 
-    def ParserJson(self, item):
+    def show(self):
+        for barcodes in self.JsonContent.keys():
+            items = self.Parser2Json(barcodes)
+            print "" + items + ": " + str(self.JsonContent[barcodes])
+
+    def Parser2Json(self, item):
         if item[0].isdigit():
-            return self.JsonFileContent[item]
+            return self.JsonContent[item]
         else:
             print "could not convert please use learn first next time"
             return item
 
     def LearnCodeJson(self, item, name):
-        self.JsonFileContent.update({item:name})
+        self.JsonContent.update({item:name})
         print "learned "+item+" is "+name
 
     def Load4Json(self, json_filename):
@@ -28,48 +31,13 @@ class barcodereader:
             fPtr = open(filename,"w")
             print "created " + filename
         else:
-            self.jsonFileContent = json.load(fPtr)
+            self.JsonContent = json.load(fPtr)
         finally:
             fPtr.close()
             self.JsonFilename = json_filename
 
     def Save2Json(self, json_filename):
         fPtr = open(json_filename, 'w')
-        json.dump(self.JsonFileContent, fPtr)
+        json.dump(self.JsonContent, fPtr)
         fPtr.close()
         self.JsonFilename = json_filename
-
-
-def parser(product):
-    if product[0].isdigit():
-        known_product = load("barcode.json")[product]
-        return known_product
-    else:
-        print "could not convert please use learn first next time"
-        return product
-
-def learn():
-    product = raw_input("Barcode: ")
-    name = raw_input("Name: ")
-    barcode = load("barcode.json")
-    barcode.update({product:name})
-    print barcode
-    save(barcode, "barcode.json")
-
-def save(d,filename):
-    f = open(filename, "w")
-    json.dump(d,f)
-    f.close()
-
-def load(filename):
-    try:
-        d = {}
-        f = open(filename,"r")
-        d = json.load(f)
-        f.close()
-    except:
-        print "created " + filename
-        f = open(filename,"w")
-        f.close()
-        d = {}
-    return d
