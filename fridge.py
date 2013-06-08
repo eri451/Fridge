@@ -1,4 +1,6 @@
 #!/usr/bin/python
+# how to
+# build class fridge and product
 
 import sys
 import json
@@ -88,8 +90,12 @@ def open_fridge(fridge, add, sub, product, amount):
             print "erst reinlegen dann raus nehmen!!"
             return
         for i in range(amount):
-            fridge[product] = sub_product(int(fridge[product]))
-        print str(amount) + " " + product + " rausgenommen"
+            if not fridge[product]:
+                print "Fridge leer!"
+                break
+            else:
+                fridge[product] = sub_product(fridge[product])
+        print str(i) + " " + product + " rausgenommen"
         print str(fridge[product]) + " " + product + " verbleiben"
         save(fridge,"fridge.json")
     else:
@@ -112,8 +118,8 @@ def sub_product(product):
     if product >= 1:
         product -= 1
         return product
-    else:
-        print "Fridge leer!"
+    else:           
+        return 0
 
 def save(d,filename):
     f = open(filename, "w")
