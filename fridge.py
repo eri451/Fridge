@@ -102,7 +102,7 @@ def interactiv():
     args.product = "NULL"
     args.amount = int(0)
     while (not args.list) and (not args.add) and (not args.sub):
-        mode = raw_input("Modus= ")
+        mode = str(raw_input("Modus= "))
         if mode == "list":
             args.list = True
             return args
@@ -127,7 +127,7 @@ def interactiv():
             print str(args.amount) + " invald amount"
             print "Bitte neu eingeben!"
 
-    args.product = raw_input("Product= ")
+    args.product = str(raw_input("Product= "))
     return args
 
 def open_fridge(fridge, argv):
@@ -143,7 +143,9 @@ def open_fridge(fridge, argv):
                 print "Fridge ist leer!"
         else:
             print "Fehler beim herrausnehmen der Ware."
-            print "Es sind " + str(abs(result)) + " " + argv.product + " zu wenig vorhanden!"
+            if result == -1:
+                print "Ware noch nicht vorhanden oder"
+            print str(abs(result)) + " " + argv.product + " zu wenig vorhanden!"
             sys.exit(os.EX_UNAVAILABLE)
 
     print str(fridge.JsonContent[argv.product]) + " " + argv.product + " verbleiben"
