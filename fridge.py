@@ -24,21 +24,21 @@ class store:
             items = self.barcoderead.ParserJson(barcodes)
             print "" + items + ": " + str(self.JsonContent[barcodes])
 
-    def add(self, items):
+    def add(self, items, amount):
         if not self.JsonContent.has_key(items):
             self.JsonContent.update({items : 0})
-            self.include(items)
+        self.JsonContent[items] += amount
+        return self.JsonContent[items]
+
+    def sub(self, items, amount):
+        if not self.JsonContent.has_key(items):
+            return -1
+        if (self.JsonContent[items] - amount) < 0:
+            return (self.JsonContent[items] - amount)
         else:
-            self.JsonContent[items] += 1
+            self.JsonContent[items] -= amount
             return self.JsonContent[items]
-    
-    def sub(self, items):
-        if self.JsonContent[items] >= 1:
-            self.JsonContent[items] -= 1
-            return self.JsonContent[items]
-        else:           
-            return 0
-    
+
     def SaveJson(self, json_filename):
         fPtr = open(json_filename, 'w')
         json.dump(self.JsonContent, fPtr)
@@ -61,8 +61,8 @@ class store:
 
 def args_parser(args):
     argparser = argparse.ArgumentParser(
-            prog='fridge', 
-            argument_default=False, 
+            prog='fridge',
+            argument_default=False,
             description='Program to list, add or sub the fridge content.'
             )
     mutually_parser = argparser.add_mutually_exclusive_group(required=True)
@@ -74,12 +74,12 @@ def args_parser(args):
                   Require \'-p\' and \'-m\''
             )
 
-    mutually_parser.add_argument('-s', '--sub', 
-            action='store_true', 
+    mutually_parser.add_argument('-s', '--sub',
+            action='store_true',
             help='Substitute a product.\
                   Require \'-p\' and \'-m\''
             )
-    
+
     argparser.add_argument('-p', '--product',
             type=str,
             metavar='<Productname>',
@@ -117,30 +117,27 @@ def interactiv():
 
     args.amount = int(raw_input("Anzahl= "))
     if args.amount < 1:
-        print args.amount "invald amount"
+        print str(args.amount) + "invald amount"
         sys.exit(os.EX_DATAERR)
     args.product = raw_input("Product= ")
     return args
 
 def open_fridge(fridge, argv):
-    for i in range(argv.amount):
-        if argv.add:
-            fridge.add(argv.product)
-        elif argv.sub:
-            if not fridge.JsonContent.has_key(argv.product):
-                print "erst reinlegen dann raus nehmen!!"
-                return
-            elif not fridge.JsonContent[argv.product]:
-                print "Fridge leer!"
-                i-=1
-                break
-            else:
-                fridge.sub(argv.product)
-    i+=1
+
     if argv.add:
-        print str(i) + " " + argv.product + " hinzugefuegt"
-    if argv.sub:
-        print str(i) + " " + argv.product + " rausgenommen"
+        result = fridge.add(argv.product, argv.amount)
+        print str(argv.amount) + " " + argv.product + " hinzugefuegt"
+    elif argv.sub:
+        result = fridge.sub(argv.product, argv.amount)
+        if result >= 0:
+            print str(argv.amount) + " " + argv.product + " herausgenommen"
+            if result == 0:
+                print "Fridge ist leer!"
+        else:
+            print "Fehler beim herrausnehmen der Ware."
+            print "Es sind " + str(abs(result)) + " " + argv.product + " zu wenig vorhanden!"
+            sys.exit(os.EX_UNAVAILABLE)
+
     print str(fridge.JsonContent[argv.product]) + " " + argv.product + " verbleiben"
 
 def main(args):
@@ -155,15 +152,15 @@ def main(args):
         sys.exit(os.EX_DATAERR)
     else:
         argv = args_parser(args[1:])
-    
+
     if argv.list:
         fridge.show()
     elif argv.sub or argv.add:
         open_fridge(fridge, argv)
-    
+
     fridge.SaveJson("fridge.json")
     fridge.barcoderead.SaveJson("barcode.json")
     sys.exit(os.EX_OK)
-        
+
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
