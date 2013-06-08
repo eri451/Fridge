@@ -21,7 +21,7 @@ class store:
 
     def show(self):
         for barcodes in self.JsonContent.keys():
-            items = self.barcoderead.Parser2Json(barcodes)
+            items = self.barcoderead.ParserJson(barcodes)
             print "" + items + ": " + str(self.JsonContent[barcodes])
 
     def include(self, items):
@@ -39,13 +39,13 @@ class store:
         else:           
             return 0
     
-    def Save2Json(self, json_filename):
+    def SaveJson(self, json_filename):
         fPtr = open(json_filename, 'w')
         json.dump(self.JsonContent, fPtr)
         fPtr.close()
         self.JsonFilename = json_filename
 
-    def Load4Json(self, json_filename):
+    def LoadJson(self, json_filename):
         try:
             fPtr = open(json_filename, 'r')
             try:
@@ -58,54 +58,6 @@ class store:
         finally:
             fPtr.close()
             self.JsonFilename = json_filename
-
-def main(args):
-    fridge = store()
-    fridge.Load4Json("fridge.json")
-    fridge.barcoderead.Load4Json("barcode.json")
-
-    if len(args) <= 1:
-        argv = interactiv()
-    elif len(args) > 6:
-        print "too many arguments"
-        sys.exit(os.EX_DATAERR)
-    else:
-        argv = args_parser(args[1:])
-    
-    if argv.list:
-        fridge.show()
-    elif argv.sub or argv.add:
-        open_fridge(fridge, argv)
-    
-    fridge.Save2Json("fridge.json")
-    fridge.barcoderead.Save2Json("barcode.json")
-    sys.exit(os.EX_OK)
-        
-def interactiv():
-    args = awsome()
-    args.add = False
-    args.sub = False
-    args.list = False
-    args.product = "NULL"
-    args.amount = int(0)
-    while (not args.list) and (not args.add) and (not args.sub):
-        mode = raw_input("Modus= ")
-        if mode == "list":
-            args.list = True
-            return args
-        elif mode == "add":
-            args.add = True
-        elif mode == "sub":
-            args.sub = True
-        elif mode == "esc":
-            sys.exit(os.EX_OK)
-        else:
-            print "No valid mode"
-        
-    args.product = raw_input("Product= ")
-    args.amount = int(raw_input("Anzahl= "))
-    return args
-
 
 def args_parser(args):
     argparser = argparse.ArgumentParser(
@@ -142,6 +94,31 @@ def args_parser(args):
             )
     return argparser.parse_args(args)
 
+def interactiv():
+    args = awsome()
+    args.add = False
+    args.sub = False
+    args.list = False
+    args.product = "NULL"
+    args.amount = int(0)
+    while (not args.list) and (not args.add) and (not args.sub):
+        mode = raw_input("Modus= ")
+        if mode == "list":
+            args.list = True
+            return args
+        elif mode == "add":
+            args.add = True
+        elif mode == "sub":
+            args.sub = True
+        elif mode == "esc":
+            sys.exit(os.EX_OK)
+        else:
+            print "No valid mode"
+        
+    args.amount = int(raw_input("Anzahl= "))
+    args.product = raw_input("Product= ")
+    return args
+
 def open_fridge(fridge, argv):
     for i in range(argv.amount):
         if argv.add:
@@ -163,5 +140,28 @@ def open_fridge(fridge, argv):
         print str(i) + " " + argv.product + " rausgenommen"
     print str(fridge.JsonContent[argv.product]) + " " + argv.product + " verbleiben"
 
+def main(args):
+    fridge = store()
+    fridge.LoadJson("fridge.json")
+    fridge.barcoderead.LoadJson("barcode.json")
+
+    if len(args) <= 1:
+        argv = interactiv()
+    elif len(args) > 6:
+        print "too many arguments"
+        sys.exit(os.EX_DATAERR)
+    else:
+        argv = args_parser(args[1:])
+    
+    if argv.list:
+        fridge.show()
+
+    elif argv.sub or argv.add:
+        open_fridge(fridge, argv)
+    
+    fridge.SaveJson("fridge.json")
+    fridge.barcoderead.SaveJson("barcode.json")
+    sys.exit(os.EX_OK)
+        
 if __name__ == '__main__':
     sys.exit(main(sys.argv))

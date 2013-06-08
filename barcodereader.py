@@ -10,10 +10,10 @@ class barcodereader:
 
     def show(self):
         for barcodes in self.JsonContent.keys():
-            items = self.Parser2Json(barcodes)
+            items = self.ParserJson(barcodes)
             print "" + items + ": " + str(self.JsonContent[barcodes])
 
-    def Parser2Json(self, item):
+    def ParserJson(self, item):
         if item[0].isdigit():
             return self.JsonContent[item]
         else:
@@ -24,7 +24,7 @@ class barcodereader:
         self.JsonContent.update({item:name})
         print "learned "+item+" is "+name
 
-    def Load4Json(self, json_filename):
+    def LoadJson(self, json_filename):
         try:
             fPtr = open(json_filename, 'r')
         except IOError:
@@ -36,7 +36,7 @@ class barcodereader:
             fPtr.close()
             self.JsonFilename = json_filename
 
-    def Save2Json(self, json_filename):
+    def SaveJson(self, json_filename):
         fPtr = open(json_filename, 'w')
         json.dump(self.JsonContent, fPtr)
         fPtr.close()
