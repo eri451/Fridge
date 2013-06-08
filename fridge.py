@@ -24,7 +24,7 @@ class store:
             items = self.barcoderead.ParserJson(barcodes)
             print "" + items + ": " + str(self.JsonContent[barcodes])
 
-    def include(self, items):
+    def add(self, items):
         if not self.JsonContent.has_key(items):
             self.JsonContent.update({items : 0})
             self.include(items)
@@ -32,7 +32,7 @@ class store:
             self.JsonContent[items] += 1
             return self.JsonContent[items]
     
-    def exclude(self, items):
+    def sub(self, items):
         if self.JsonContent[items] >= 1:
             self.JsonContent[items] -= 1
             return self.JsonContent[items]
@@ -114,7 +114,7 @@ def interactiv():
             sys.exit(os.EX_OK)
         else:
             print "No valid mode"
-        
+
     args.amount = int(raw_input("Anzahl= "))
     if args.amount < 1:
         print args.amount "invald amount"
@@ -125,7 +125,7 @@ def interactiv():
 def open_fridge(fridge, argv):
     for i in range(argv.amount):
         if argv.add:
-            fridge.include(argv.product)
+            fridge.add(argv.product)
         elif argv.sub:
             if not fridge.JsonContent.has_key(argv.product):
                 print "erst reinlegen dann raus nehmen!!"
@@ -135,8 +135,8 @@ def open_fridge(fridge, argv):
                 i-=1
                 break
             else:
-                fridge.exclude(argv.product)
-    i+=1            
+                fridge.sub(argv.product)
+    i+=1
     if argv.add:
         print str(i) + " " + argv.product + " hinzugefuegt"
     if argv.sub:
@@ -158,7 +158,6 @@ def main(args):
     
     if argv.list:
         fridge.show()
-
     elif argv.sub or argv.add:
         open_fridge(fridge, argv)
     
