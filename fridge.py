@@ -115,10 +115,18 @@ def interactiv():
         else:
             print "No valid mode"
 
-    args.amount = int(raw_input("Anzahl= "))
-    if args.amount < 1:
-        print str(args.amount) + "invald amount"
-        sys.exit(os.EX_DATAERR)
+    while True:
+        try:
+            args.amount = int(raw_input("Anzahl= "))
+        except ValueError:
+            print "Invald input."
+            continue
+        if 1 < args.amount < 256:
+            break
+        else:
+            print str(args.amount) + " invald amount"
+            print "Bitte neu eingeben!"
+
     args.product = raw_input("Product= ")
     return args
 
