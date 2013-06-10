@@ -4,7 +4,6 @@ import os
 import sys
 import json
 import argparse
-import barcodereader
 
 class awsome:
     def __init__(self):
@@ -15,13 +14,11 @@ class awsome:
 class store:
     """ Masterclass of a fridge"""
     def __init__(self):
-        self.barcoderead = barcodereader.barcodereader()
         self.JsonFilename = ""
         self.JsonContent = {}
 
     def show(self):
         for barcodes in self.JsonContent.keys():
-            items = self.barcoderead.ParserJson(barcodes)
             print "" + items + ": " + str(self.JsonContent[barcodes])
 
     def add(self, items, amount):
@@ -66,7 +63,9 @@ def args_parser(args):
             description='Program to list, add or sub the fridge content.'
             )
     mutually_parser = argparser.add_mutually_exclusive_group(required=True)
-    mutually_parser.add_argument('-l', '--list', action='store_true', help='List the content of the fridge.')
+    mutually_parser.add_argument('-l', '--list',\
+            action='store_true',\
+            help='List the content of the fridge.')
 
     mutually_parser.add_argument('-a', '--add',
             action='store_true',
@@ -102,8 +101,9 @@ def interactiv():
     args.list = False
     args.product = "NULL"
     args.amount = int(0)
+
     while (not args.list) and (not args.add) and (not args.sub):
-        mode = str(raw_input("Modus= "))
+        mode = str(raw_input("Modus = "))
         if mode == "list":
             args.list = True
             return args
@@ -118,7 +118,7 @@ def interactiv():
 
     while True:
         try:
-            args.amount = int(raw_input("Anzahl= "))
+            args.amount = int(raw_input("Anzahl = "))
         except ValueError:
             print "Invald input."
             continue
@@ -128,7 +128,7 @@ def interactiv():
             print str(args.amount) + " invald amount"
             print "Bitte neu eingeben!"
 
-    args.product = str(raw_input("Product= "))
+    args.product = str(raw_input("Product = "))
     return args
 
 def open_fridge(fridge, argv):
@@ -154,7 +154,6 @@ def open_fridge(fridge, argv):
 def main(args):
     fridge = store()
     fridge.LoadJson("fridge.json")
-    fridge.barcoderead.LoadJson("barcode.json")
 
     if len(args) <= 1:
         argv = interactiv()
@@ -170,7 +169,6 @@ def main(args):
         open_fridge(fridge, argv)
 
     fridge.SaveJson("fridge.json")
-    fridge.barcoderead.SaveJson("barcode.json")
     sys.exit(os.EX_OK)
 
 if __name__ == '__main__':
