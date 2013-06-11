@@ -128,7 +128,17 @@ def interactiv():
             print str(args.amount) + " invald amount"
             print "Bitte neu eingeben!"
 
-    args.product = str(raw_input("Product = "))
+    while True:
+        try:
+            args.product = str(raw_input("Product = "))
+        except ValueError:
+            print "Invald input."
+            continue
+        if 1 < len(args.product) <  256:
+            break
+        else:
+            print str(args.product) + " invald String"
+            print "Bitte neu eingeben!"
     return args
 
 def open_fridge(fridge, argv):
